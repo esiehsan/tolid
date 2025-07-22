@@ -1,0 +1,17 @@
+<html>
+    <header> فهرست قطعات</header>
+    <body>
+    {% if parts %}
+        <ul>
+            {% for part in parts %}
+            <li>
+            {{part}}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>هیچ قطعه ای ثبت نشده است</p>
+    {% endif %}
+
+    </body>
+</html>

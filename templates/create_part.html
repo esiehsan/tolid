@@ -1,0 +1,18 @@
+
+<html>
+    <head>
+        <title>قطعه جدید</title>
+    </head>
+    {% load static %}
+    {% load jalali_tags %}
+    
+    <body>
+        <h1>ثبت قطعه جدید</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">ثبت</button>
+
+        </form>
+    </body>
+</html>

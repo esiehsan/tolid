@@ -1,0 +1,15 @@
+<html>
+    {% if employees %}
+    <ul>
+    {% for employee in employees %}
+    <li>
+        <strong>{{ employee.employeeId }}</strong>
+        {{ employee.fName }} {{ employee.lName }} 
+    </li>
+    {% endfor %}
+
+    </ul>
+    {% else %}
+    <p>هیچ کارگری ثبت نشده است</p>
+{% endif %}
+</html>
