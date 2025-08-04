@@ -1,18 +1,203 @@
 
-<html>
+<html lang="fa" dir="rtl">
     <head>
         <title>قطعه جدید</title>
-    </head>
+
+    <script src="https://unpkg.com/@ericblade/quagga2@1.2.6/dist/quagga.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     {% load static %}
     {% load jalali_tags %}
-    
-    <body>
+
+
+<script>
+  window.addEventListener('load', function() {
+    const inputList = document.querySelectorAll('input[name="partNumber"]');
+    if (inputList.length > 0) {
+      inputList[0].id = "partNumber-field";
+    }
+  });
+</script>
+
+  <style>
+     #scanner-container-part,
+     #scanner-container-mold {
+      width: 300px;
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+    }
+
+    #scanner-container-part video,
+    #scanner-container-part canvas,
+    #scanner-container-mold video,
+    #scanner-container-mold canvas {
+
+      top: 0;
+      left: 0;
+
+      width: 300;
+      height: 200;
+
+  }
+  </style>
+
+
+</head>
+
+    <body class="bg-light">
         <h1>ثبت قطعه جدید</h1>
+      <div class="container mt-5" >  
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">ثبت</button>
+            {{form.media}}
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-6 mb-3" >تاریخ ریخته گری: </div>
+            <div class="col-12 col-md-6 col-lg-6 mb-3" >{{ form.castDate }}</div>
+            <div class="col-12 col-md-6 col-lg-6 mb-3">{{ form.caster1.label_tag }}</div>
+            <div class="col-12 col-md-6 col-lg-6 mb-3" >{{ form.caster1 }}</div>
+            <div class="col-12 col-md-6 col-lg-6 mb-3">{{ form.caster2.label_tag }}</div>
+            <div class="col-12 col-md-6 col-lg-6 mb-3" > {{ form.caster2 }}</div>
+            <div class="col-12 col-md-6 col-lg-6 mb-3">{{ form.caster3.label_tag }}</div>
+            <div class="col-12 col-md-6 col-lg-6 mb-3" > {{ form.caster3 }}</div>
+        
 
-        </form>
+        <div  class="col-12 col-md-6 col-lg-6 mb-3">{{ form.mold_Id.label_tag }}</div>
+        <div class="col-12 col-md-6 col-lg-6">
+        <div class="row mb-3">
+          <div class="col-9 col-md-8 col-lg-8">
+              {{ form.mold_Id }}
+          </div>
+          <div class="col-3 col-md-4 col-lg-4">
+              <button type="button" onclick="startScannerMold()" class=" btn btn-primary w-100">
+                اسکن
+              </button>
+          </div>
+          <div id="scanner-container-part" class="col-12 col-md-12 col-lg-12 form-control mx-3" ></div>
+
+        </div>
+        
+        </div>
+      
+        <div  class="col-12 col-md-6 col-lg-6 mb-3">{{ form.partNumber.label_tag }}</div>
+        <div class="col-12 col-md-6 col-lg-6">
+        <div class="row mb-3">
+          <div class="col-9 col-md-8 col-lg-8">
+              {{ form.partNumber }}
+          </div>
+          <div class="col-3 col-md-4 col-lg-4">
+              <button type="button" onclick="startScannerPart()" class=" btn btn-primary w-100">
+                اسکن
+              </button>
+          </div>
+          <div id="scanner-container-part" class="col-12 col-md-12 col-lg-12 form-control mx-3" ></div>
+
+        </div>
+        
+        </div>
+               
+      </div>
+
+
+
+           
+        
+<div class="row">
+  <div class="col-12">
+    <button type="submit" class="btn btn-success w-100 ">ثبت</button>
+  </div>
+</div>
+</form>
+</div>
+<script>
+let activeScanner = null;
+
+function stopScanner() {
+  if (Quagga && typeof Quagga.stop === "function") {
+    Quagga.stop();
+    Quagga.offDetected(); // remove previous listener
+    activeScanner = null;
+  }
+}
+
+function startScanner(containerId, inputId) {
+  stopScanner(); // جلوگیری از اجرای همزمان
+
+  const container = document.getElementById(containerId);
+
+  Quagga.init({
+    inputStream: {
+      name: "Live",
+      type: "LiveStream",
+      target: container,
+      constraints: {
+        facingMode: "environment",
+        width: { ideal: 300 },
+        height: { ideal: 200 }
+      }
+    },
+    decoder: {
+      readers: ["ean_reader", "code_128_reader", "upc_reader"]
+    },
+    locate: true
+  }, function (err) {
+    if (err) {
+      console.error("خطا در راه‌اندازی Quagga:", err);
+      return;
+    }
+    Quagga.start();
+    activeScanner = containerId;
+  });
+
+  Quagga.onDetected(function (data) {
+    const code = data.codeResult.code;
+    document.getElementById(inputId).value = code;
+    playBeep();
+    stopScanner();
+    container.innerHTML = ''; // بستن تصویر و پاک کردن DOM
+
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.startScannerPart = function () {
+    startScanner("scanner-container-part", "partNumber-field");
+  };
+
+  window.startScannerMold = function () {
+    startScanner("scanner-container-mold", "id_mold_Id");
+  };
+});
+</script>
+
+<script>
+function playBeep() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.type = 'sine'; // نوع موج: sine, square, triangle, sawtooth
+  oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // فرکانس (Hz)
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.start();
+  gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2); // 0.2 ثانیه صدا
+
+  oscillator.stop(audioCtx.currentTime + 0.2);
+}
+</script>
+
+
+		<link rel="stylesheet" href="{% static 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css' %}">
+		<script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
+
     </body>
+
+
+
+
 </html>

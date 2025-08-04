@@ -33,10 +33,15 @@ def create_part(request):
         form = PartForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('parts')
+            return redirect('create_part')
         else:
             return HttpResponse('<h1>ERROR</h1>')
     else:
-        form = PartForm()
+        lastPart = Part.objects.last()
+        form = PartForm(initial={'castDate':lastPart.castDate,
+                                 'caster1':lastPart.caster1,
+                                 'caster2':lastPart.caster2,
+                                 'caster3':lastPart.caster3,
+                                 })
         context = {'form': form}
         return render(request, 'create_Part.html', context)

@@ -17,19 +17,22 @@ class Employee(models.Model):
 class Part(models.Model):
     partNumber = models.IntegerField(verbose_name='کد قطعه', validators=[MinValueValidator(0)])
     castDate = models.DateField()
-    caster1 = models.ForeignKey(to='Employee', 
+    caster1 = models.ForeignKey(to='Employee',
+                                verbose_name='ریخته گر1',
                                 on_delete=models.PROTECT,
                                 related_name='parts_as_caster1',
                                 null=True,
                                 blank=True)
     
     caster2 = models.ForeignKey(to='Employee',
+                                verbose_name='ریخته گر2',
                                 on_delete=models.PROTECT,
                                 related_name='parts_as_caster2',
                                 null=True, 
                                 blank=True)
     
     caster3 = models.ForeignKey(to='Employee',
+                                verbose_name='ریخته گر3',
                                 on_delete=models.PROTECT, 
                                 related_name='parts_as_caster3', 
                                 null=True, 
